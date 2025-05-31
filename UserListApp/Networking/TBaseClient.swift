@@ -98,7 +98,7 @@ class TBaseClient: NSObject {
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
         
         // If explicit query parameters are provided, convert them to URLQueryItems
-        if let queryParameters = queryParam {
+        if let queryParameters = queryParam, queryParameters.keys.count > 0 {
             var queryItems: [URLQueryItem] = []
             for (key, value) in queryParameters {
                 queryItems.append(URLQueryItem(name: key, value: value))
@@ -115,10 +115,12 @@ class TBaseClient: NSObject {
             if [.GET, .DELETE].contains(method), let data = jsonData {
                 let params = (try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]) ?? [:]
                 var queryItems: [URLQueryItem] = []
-                for (key, value) in params {
-                    queryItems.append(URLQueryItem(name: key, value: "\(value)"))
+                if params.keys.count > 0 {
+                    for (key, value) in params {
+                        queryItems.append(URLQueryItem(name: key, value: "\(value)"))
+                    }
+                    components.queryItems = queryItems
                 }
-                components.queryItems = queryItems
             }
         }
         

@@ -9,11 +9,6 @@ import UserListApp
 
 /// Mock cho UserListUsecase, trả về dữ liệu tùy vào tham số `since`
 private final class MockUsecase: UserListUsecase {
-    /// Không dùng trong test này, chỉ để tránh compiler lỗi
-    func fetchUserDetail(loginUserName: String) -> RxSwift.Observable<UserListApp.UserModel> {
-        return .empty()
-    }
-    
     /// Trang đầu (since = 0)
     private let firstPage: [UserModel]
     /// Trang thứ hai (since = size)
@@ -204,11 +199,7 @@ final class UserListViewModelTests: XCTestCase {
         let freshFirstPage = [userD]
         
         // Custom Usecase: lần đầu gọi trả initialFirstPage, lần thứ hai (refresh) thì trả freshFirstPage
-        class OverrideUsecase: UserListUsecase {
-            func fetchUserDetail(loginUserName: String) -> RxSwift.Observable<UserListApp.UserModel> {
-                .empty()
-            }
-            
+        class OverrideUsecase: UserListUsecase {    
             let firstPage: [UserModel]
             let refreshPage: [UserModel]
             var haveRefreshed = false

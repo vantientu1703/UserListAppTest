@@ -11,11 +11,6 @@ public protocol UserListUsecase {
     ///   - cachable: Whether to attempt to read from cache before making a network call.
     /// - Returns: An Observable emitting an array of `UserModel` or an error.
     func fetchUserList(size: Int, since: Int, cachable: Bool) -> Observable<[UserModel]>
-    
-    /// Fetch detailed information for a single user by their login/username.
-    /// - Parameter loginUserName: The username of the user to fetch details for.
-    /// - Returns: An Observable emitting a single `UserModel` or an error.
-    func fetchUserDetail(loginUserName: String) -> Observable<UserModel>
 }
 
 /// Default implementation of `UserListUsecase`.
@@ -33,11 +28,5 @@ extension DefaultUserListUsecase: UserListUsecase {
     /// - SeeAlso: `UserClient.fetchUserList(perPage:since:cachable:)`
     func fetchUserList(size: Int, since: Int, cachable: Bool) -> RxSwift.Observable<[UserModel]> {
         return service.fetchUserList(perPage: size, since: since, cachable: cachable)
-    }
-    
-    /// Fetch detailed information for a single user by delegating to `UserClient`.
-    /// - SeeAlso: `UserClient.fetchUserDetail(loginUserName:)`
-    func fetchUserDetail(loginUserName: String) -> RxSwift.Observable<UserModel> {
-        return service.fetchUserDetail(loginUserName: loginUserName)
     }
 }
