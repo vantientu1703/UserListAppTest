@@ -15,6 +15,8 @@ target 'UserListApp' do
 
   target 'UserListAppTests' do
     inherit! :search_paths
+    pod 'RxBlocking', '6.9.0'
+    pod 'RxTest', '6.9.0'
     # Pods for testing
   end
 

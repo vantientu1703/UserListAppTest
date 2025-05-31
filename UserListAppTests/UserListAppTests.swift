@@ -6,6 +6,8 @@
 //
 
 import Testing
+import XCTest
+
 @testable import UserListApp
 
 struct UserListAppTests {

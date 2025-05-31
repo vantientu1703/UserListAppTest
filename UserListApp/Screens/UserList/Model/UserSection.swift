@@ -9,18 +9,18 @@ import UIKit
 import RxDataSources
 
 extension UserModel: IdentifiableType {
-    typealias Identity = String
+    public typealias Identity = String
     
-    var identity: String {
+    public var identity: String {
         return "\(login ?? "")\(avatarURL ?? "")\(htmlURL ?? "")\(location ?? "")\(followers ?? 0)\(following ?? 0)"
     }
 }
 
-enum UserSection: AnimatableSectionModelType {
+public enum UserSection: AnimatableSectionModelType {
     
     case userList(items: [UserModel])
     
-    var items: [UserModel] {
+    public var items: [UserModel] {
         switch self {
             
         case .userList(let items):
@@ -28,22 +28,28 @@ enum UserSection: AnimatableSectionModelType {
         }
     }
     
-    init(original: UserSection, items: [UserModel]) {
+    public init(original: UserSection, items: [UserModel]) {
         switch original {
         case .userList(let items):
             self = .userList(items: items)
         }
     }
     
-    var identity: String {
+    public var identity: String {
         switch self {
         case .userList(let items): return items.map { $0.identity }.joined()
         }
     }
     
-    typealias Item = UserModel
+    public typealias Item = UserModel
     
-    typealias Identity = String
+    public typealias Identity = String
+}
+
+extension UserSection: Equatable {
+    public static func ==(rhs: UserSection, lhs: UserSection) -> Bool {
+        return rhs.identity == lhs.identity
+    }
 }
 
 extension UserModel: Hashable {
@@ -58,7 +64,7 @@ extension UserModel: Hashable {
 }
 
 extension Array where Element == UserModel {
-    func uniqueIdentities() -> [UserModel] {
+    public func uniqueIdentities() -> [UserModel] {
         return Array(Set(self))
     }
 }

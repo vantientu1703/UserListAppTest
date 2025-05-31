@@ -8,24 +8,24 @@ import RxDataSources
 import Foundation
 
 /// Model đại diện cho một người dùng (User)
-struct UserModel: Codable {
+public struct UserModel: Codable {
     /// Tên đăng nhập (login username)
-    let login: String?
+    public let login: String?
     
     /// URL ảnh đại diện của người dùng
-    let avatarURL: String?
+    var avatarURL: String?
     
     /// URL trang GitHub của người dùng
-    let htmlURL: String?
+    var htmlURL: String?
     
     /// Thành phố/quốc gia nơi người dùng đang sinh sống
-    let location: String?
+    var location: String?
     
     /// Số người đang theo dõi người dùng (followers)
-    let followers: Int?
+    var followers: Int?
     
     /// Số người mà người dùng đang theo dõi (following)
-    let following: Int?
+    var following: Int?
 
     private enum CodingKeys: String, CodingKey {
         case login
@@ -35,10 +35,14 @@ struct UserModel: Codable {
         case followers
         case following
     }
+    
+    public init(login: String) {
+        self.login = login
+    }
 }
 
 extension UserModel: Equatable {
-    static func ==(rhs: UserModel, lhs: UserModel) -> Bool {
+    static public func ==(rhs: UserModel, lhs: UserModel) -> Bool {
         return rhs.login == lhs.login &&
         rhs.avatarURL == lhs.avatarURL &&
         rhs.htmlURL == lhs.htmlURL &&

@@ -1,7 +1,7 @@
 import Foundation
 import RxSwift
 
-protocol UserListNavigator {
+public protocol UserListNavigator {
     func showError()
     func showUserDetail(user: UserModel)
 }

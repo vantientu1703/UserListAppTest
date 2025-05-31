@@ -63,7 +63,8 @@ extension UserListViewController {
         let loadMoreTriggered = tableView.rx.reachedBottom
         let modelSelected = tableView.rx.modelSelected(UserModel.self).asObservable()
         
-        let input = UserListViewModel.Input(refresh: refreshTriggered,
+        let input = UserListViewModel.Input(firstRequest: .just(()),
+                                            refresh: refreshTriggered,
                                             loadMore: loadMoreTriggered,
                                             modelSelected: modelSelected)
         
