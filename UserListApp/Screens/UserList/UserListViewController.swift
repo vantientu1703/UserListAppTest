@@ -61,6 +61,7 @@ extension UserListViewController {
                 self?.refreshControl.endRefreshing()
             })
         let loadMoreTriggered = tableView.rx.reachedBottom
+            .debounce(.milliseconds(100), scheduler: ConcurrentDispatchQueueScheduler(queue: .global()))
         let modelSelected = tableView.rx.modelSelected(UserModel.self).asObservable()
         
         let input = UserListViewModel.Input(firstRequest: .just(()),

@@ -37,7 +37,7 @@ public enum UserSection: AnimatableSectionModelType {
     
     public var identity: String {
         switch self {
-        case .userList(let items): return items.map { $0.identity }.joined()
+        case .userList: return "user list"
         }
     }
     
@@ -65,6 +65,12 @@ extension UserModel: Hashable {
 
 extension Array where Element == UserModel {
     public func uniqueIdentities() -> [UserModel] {
-        return Array(Set(self))
+        var uniques: [UserModel] = []
+        forEach { u in
+            if !uniques.contains(u) {
+                uniques.append(u)
+            }
+        }
+        return uniques
     }
 }

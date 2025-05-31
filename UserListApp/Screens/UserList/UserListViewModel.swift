@@ -101,10 +101,12 @@ public class UserListViewModel {
         let loadMoreData = firstRequest.flatMapLatest { users in
             return loadMoreRequest
                 .startWith([]) // Start with an empty array so that scan has an initial value
-                .scan(users) { previousUsers, newUsers in
-                    // Prepend newUsers (page n+1) to existing users (page 1..n)
-                    return newUsers + previousUsers
-                }
+                .scan(users, accumulator: { result, newUsers in
+                    return result + newUsers
+                })
+                .do(onNext: { users in
+                    
+                })
         }
         
         // Merge first load, refresh, and combined load-more streams. Then:
@@ -115,6 +117,9 @@ public class UserListViewModel {
             .merge([firstRequest, refreshRequest, loadMoreData])
             .distinctUntilChanged()
             .map({ $0.uniqueIdentities() })
+            .do(onNext: { users in
+                debugPrint("users load more count: \(users.count)")
+            })
             .map { [UserSection.userList(items: $0)] }
         
         // MARK: - Error Handling
