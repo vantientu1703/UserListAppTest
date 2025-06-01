@@ -22,6 +22,7 @@ class UserTableViewCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         disposeBag = DisposeBag()
+        self.containerView.removeRoundCornerWithShadow()
     }
     
     override func awakeFromNib() {
@@ -32,7 +33,7 @@ class UserTableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         self.containerView.roundCornerWithShadow(cornerRadius: 8,
-                                                 shadowRadius: 3,
+                                                 shadowRadius: 4,
                                                  offsetX: 0,
                                                  offsetY: 3,
                                                  color: .black.withAlphaComponent(0.2),

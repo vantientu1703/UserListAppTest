@@ -294,34 +294,34 @@ extension Cache where Key: Codable, Value: Codable {
 // MARK: - Specialized typealias for caching user lists
 
 /// A specialized Cache mapping String keys (e.g. request URL) to an array of `UserModel`.
-typealias UserListCache = Cache<String, [UserModel]>
+typealias DataCache<T: Codable> = Cache<String, T>
 
 /// Manages the user-list-specific cache, handling both in-memory and on-disk storage.
-class UserListCacheManager {
+class DataCacheManager<T: Codable> {
     
     /// The fixed file name (without extension) under Caches directory for persisting user-list cache.
     private let dataCachedName = "DataCache"
     
     /// The in-memory cache instance.
-    let cache: UserListCache
+    let cache: DataCache<T>
     
     /// Initializes the manager by attempting to load a previously saved cache from disk.
     /// If loading fails, creates a new empty cache.
     init() {
-        if let diskCache = try? UserListCache.getCache(withName: dataCachedName) {
+        if let diskCache: DataCache<T> = try? DataCache.getCache(withName: dataCachedName) {
             self.cache = diskCache
             return
         }
         // If no existing file or decoding fails, create a fresh cache
-        self.cache = UserListCache()
+        self.cache = DataCache<T>()
     }
     
     /// Stores a user-list array in the cache under a given key, then saves the cache to disk.
     /// - Parameters:
     ///   - userList: Array of `UserModel` to cache.
     ///   - key: Typically the request URL string used as cache key.
-    func setUserList(_ userList: [UserModel], forKey key: String) {
-        cache.insert(userList, forKey: key)
+    func set(_ data: T, forKey key: String) {
+        cache.insert(data, forKey: key)
         // Attempt to save the updated cache to disk; ignore any errors
         try? cache.saveToDisk(withName: dataCachedName)
     }
@@ -329,7 +329,7 @@ class UserListCacheManager {
     /// Retrieves a cached user-list for the given key. Returns an empty array if not found or expired.
     /// - Parameter key: The cache key (URL string).
     /// - Returns: Cached `[UserModel]` or an empty array.
-    func getUserList(forKey key: String) -> [UserModel] {
-        return cache.value(forKey: key) ?? []
+    func get(forKey key: String) -> T? {
+        return cache.value(forKey: key)
     }
 }

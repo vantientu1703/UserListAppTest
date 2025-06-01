@@ -31,7 +31,7 @@ protocol UserClientProtocol {
 class UserClient: TBaseClient, UserClientProtocol {
     
     /// Cache manager for storing and retrieving paginated user lists to minimize duplicate requests.
-    let dataCache = UserListCacheManager()
+    let dataCache = DataCacheManager<[UserModel]>()
     
     // MARK: - Fetch User Detail
     
@@ -101,7 +101,7 @@ class UserClient: TBaseClient, UserClientProtocol {
             
             // If caching is enabled, attempt to load from cache first
             if cachable {
-                let cachedData = self.dataCache.getUserList(forKey: key)
+                let cachedData: [UserModel] = self.dataCache.get(forKey: key) ?? []
                 // If cache contains non-empty data, emit it immediately and complete
                 if !cachedData.isEmpty {
                     observer.onNext(cachedData)
@@ -121,7 +121,7 @@ class UserClient: TBaseClient, UserClientProtocol {
                     observer.onCompleted()
                     // If the returned data is non-empty, save it in the cache for future calls
                     if !data.isEmpty {
-                        self.dataCache.setUserList(data, forKey: key)
+                        self.dataCache.set(data, forKey: key)
                     }
                 case .failure(let error):
                     // On failure, emit the error

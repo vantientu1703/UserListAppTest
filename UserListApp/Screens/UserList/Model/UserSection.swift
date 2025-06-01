@@ -11,8 +11,12 @@ import RxDataSources
 extension UserModel: IdentifiableType {
     public typealias Identity = String
     
-    public var identity: String {
+    var value: String {
         return "\(login ?? "")\(avatarURL ?? "")\(htmlURL ?? "")\(location ?? "")\(followers ?? 0)\(following ?? 0)"
+    }
+    
+    public var identity: String {
+        return login ?? ""
     }
 }
 
@@ -22,7 +26,6 @@ public enum UserSection: AnimatableSectionModelType {
     
     public var items: [UserModel] {
         switch self {
-            
         case .userList(let items):
             return items
         }
@@ -30,14 +33,14 @@ public enum UserSection: AnimatableSectionModelType {
     
     public init(original: UserSection, items: [UserModel]) {
         switch original {
-        case .userList(let items):
+        case .userList:
             self = .userList(items: items)
         }
     }
     
     public var identity: String {
         switch self {
-        case .userList: return "user list"
+        case .userList: return "user_list"
         }
     }
     
