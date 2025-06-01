@@ -302,6 +302,8 @@ class DataCacheManager<T: Codable> {
     /// The fixed file name (without extension) under Caches directory for persisting user-list cache.
     private let dataCachedName = "DataCache"
     
+    private let queue: DispatchQueue = .init(label: "DataCacheManager", attributes: [.concurrent])
+    
     /// The in-memory cache instance.
     let cache: DataCache<T>
     
@@ -321,15 +323,20 @@ class DataCacheManager<T: Codable> {
     ///   - userList: Array of `UserModel` to cache.
     ///   - key: Typically the request URL string used as cache key.
     func set(_ data: T, forKey key: String) {
-        cache.insert(data, forKey: key)
-        // Attempt to save the updated cache to disk; ignore any errors
-        try? cache.saveToDisk(withName: dataCachedName)
+        queue.async(flags: .barrier) { [weak self] in
+            guard let self else { return }
+            cache.insert(data, forKey: key)
+            // Attempt to save the updated cache to disk; ignore any errors
+            try? cache.saveToDisk(withName: dataCachedName)
+        }
     }
     
     /// Retrieves a cached user-list for the given key. Returns an empty array if not found or expired.
     /// - Parameter key: The cache key (URL string).
     /// - Returns: Cached `[UserModel]` or an empty array.
     func get(forKey key: String) -> T? {
-        return cache.value(forKey: key)
+        return queue.sync {
+            cache.value(forKey: key)
+        }
     }
 }

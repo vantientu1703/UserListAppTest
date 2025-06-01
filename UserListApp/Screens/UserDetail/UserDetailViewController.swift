@@ -30,7 +30,6 @@ class UserDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         bindViewModel()
-        setupUser(viewModel.user)
     }
     
     override func viewDidLayoutSubviews() {

@@ -22,7 +22,7 @@ protocol UserClientProtocol {
     /// Fetch detailed information for a single user by username.
     /// - Parameter loginUserName: The login (username) of the user to fetch.
     /// - Returns: An Observable emitting the UserModel or an error.
-    func fetchUserDetail(loginUserName: String) -> Observable<UserModel>
+    func fetchUserDetail(loginUserName: String, cachable: Bool) -> Observable<UserModel>
 }
 
 /// Concrete implementation of `UserClientProtocol`. Responsible for sending API requests
@@ -30,21 +30,19 @@ protocol UserClientProtocol {
 /// Inherits from `TBaseClient` to reuse common request-building and response-handling logic.
 class UserClient: TBaseClient, UserClientProtocol {
     
-    /// Cache manager for storing and retrieving paginated user lists to minimize duplicate requests.
-    let dataCache = DataCacheManager<[UserModel]>()
-    
     // MARK: - Fetch User Detail
     
     /// Fetch detailed information for a single user by login (username).
     /// - Parameter loginUserName: The login (username) of the user to fetch.
     /// - Returns: An Observable that emits a `UserModel` on success or an error on failure.
-    func fetchUserDetail(loginUserName: String) -> RxSwift.Observable<UserModel> {
+    func fetchUserDetail(loginUserName: String, cachable: Bool) -> RxSwift.Observable<UserModel> {
         // Create an Observable that wraps the network call
         return Observable<UserModel>.create { [weak self] observer in
             // If `self` has been deallocated, do nothing further
             guard let self = self else {
                 return Disposables.create()
             }
+            
             // Build the GET request for "/users/{loginUserName}"
             let parameters: [String: String]? = nil
             let request = constructRequest(
@@ -53,10 +51,21 @@ class UserClient: TBaseClient, UserClientProtocol {
                 parameters: parameters
             )
             
+            /// Cache manager for storing and retrieving paginated user information to minimize duplicate requests.
+            let dataCache = DataCacheManager<UserModel>()
+            let key = request?.url?.absoluteString ?? ""
+            
+            if cachable, let model = dataCache.get(forKey: key) {
+                observer.onNext(model)
+                observer.onCompleted()
+                return Disposables.create()
+            }
+            
             // Use the helper `objectResponse` to perform the network call and decode into UserModel
             objectResponse(from: request) { (result: Swift.Result<UserModel, Error>) in
                 switch result {
                 case .success(let data):
+                    dataCache.set(data, forKey: key)
                     // On success, emit the decoded UserModel and complete
                     observer.onNext(data)
                     observer.onCompleted()
@@ -99,9 +108,12 @@ class UserClient: TBaseClient, UserClientProtocol {
             // Generate a cache key from the full URL string for this request
             let key = request?.url?.absoluteString ?? ""
             
+            /// Cache manager for storing and retrieving paginated user lists to minimize duplicate requests.
+            let dataCache = DataCacheManager<[UserModel]>()
+            
             // If caching is enabled, attempt to load from cache first
             if cachable {
-                let cachedData: [UserModel] = self.dataCache.get(forKey: key) ?? []
+                let cachedData: [UserModel] = dataCache.get(forKey: key) ?? []
                 // If cache contains non-empty data, emit it immediately and complete
                 if !cachedData.isEmpty {
                     observer.onNext(cachedData)
@@ -111,18 +123,17 @@ class UserClient: TBaseClient, UserClientProtocol {
             }
             
             // Otherwise, proceed with a network request
-            objectResponse(from: request) { [weak self] (result: Swift.Result<[UserModel], Error>) in
+            objectResponse(from: request) { (result: Swift.Result<[UserModel], Error>) in
                 // If `self` has been deallocated, do nothing further
-                guard let self = self else { return }
                 switch result {
                 case .success(let data):
+                    // If the returned data is non-empty, save it in the cache for future calls
+                    if !data.isEmpty {
+                        dataCache.set(data, forKey: key)
+                    }
                     // On success, emit the array of UserModel and complete
                     observer.onNext(data)
                     observer.onCompleted()
-                    // If the returned data is non-empty, save it in the cache for future calls
-                    if !data.isEmpty {
-                        self.dataCache.set(data, forKey: key)
-                    }
                 case .failure(let error):
                     // On failure, emit the error
                     observer.onError(error)

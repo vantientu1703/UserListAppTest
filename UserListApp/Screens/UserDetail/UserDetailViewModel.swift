@@ -58,7 +58,7 @@ public class UserDetailViewModel {
         // 4. If an error occurs, `catchErrorAndJustCompleted` will swallow the error
         //    and complete the sequence (preventing it from propagating further).
         let userDetailRequest = self.useCase
-            .fetchUserDetail(login: user.login ?? "")
+            .fetchUserDetail(login: user.login ?? "", cachable: true)
             .trackError(errorTracker)
             .trackActivity(indicator)
             .catchErrorAndJustCompleted()
@@ -72,9 +72,7 @@ public class UserDetailViewModel {
             .disposed(by: disposeBag)
         
         // Convert the user detail observable into a Driver (UI-friendly) and return it as Output.
-        return Output(
-            userDetail: userDetailRequest.asDriverOnErrorJustComplete()
-        )
+        return Output(userDetail: Driver.merge([userDetailRequest.asDriverOnErrorJustComplete(), .just(user)]))
     }
     
     /// Input struct defines all events (as observables) that the ViewModel can respond to.

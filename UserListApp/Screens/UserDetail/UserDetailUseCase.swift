@@ -7,7 +7,7 @@ public protocol UserDetailUsecase {
     /// Fetches detailed information for a single user, given their login (username).
     /// - Parameter login: The username of the user whose details are to be fetched.
     /// - Returns: An Observable emitting the UserModel on success or an error on failure.
-    func fetchUserDetail(login: String) -> Observable<UserModel>
+    func fetchUserDetail(login: String, cachable: Bool) -> Observable<UserModel>
 }
 
 /// Default implementation of the UserDetailUsecase protocol.
@@ -24,7 +24,7 @@ extension DefaultUserDetailUsecase: UserDetailUsecase {
     /// Fetches user detail by delegating to the `UserClient`.
     /// - Parameter login: The username of the user to retrieve.
     /// - Returns: An Observable that emits the `UserModel` or an error.
-    func fetchUserDetail(login: String) -> RxSwift.Observable<UserModel> {
-        return self.service.fetchUserDetail(loginUserName: login)
+    func fetchUserDetail(login: String, cachable: Bool) -> RxSwift.Observable<UserModel> {
+        return self.service.fetchUserDetail(loginUserName: login, cachable: cachable)
     }
 }

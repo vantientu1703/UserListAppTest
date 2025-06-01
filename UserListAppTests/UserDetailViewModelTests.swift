@@ -131,7 +131,7 @@ private final class MockUsecaseSuccess: UserDetailUsecase {
         self.userToReturn = user
     }
     
-    func fetchUserDetail(login: String) -> Observable<UserModel> {
+    func fetchUserDetail(login: String, cachable: Bool) -> Observable<UserModel> {
         // Trả về ngay lập tức một giá trị UserModel
         return Observable.just(userToReturn)
     }
@@ -145,7 +145,7 @@ private final class MockUsecaseError: UserDetailUsecase {
         self.errorToReturn = error
     }
     
-    func fetchUserDetail(login: String) -> Observable<UserModel> {
+    func fetchUserDetail(login: String, cachable: Bool) -> Observable<UserModel> {
         // Trả về ngay lập tức một lỗi
         return Observable.error(errorToReturn)
     }
